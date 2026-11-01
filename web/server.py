@@ -532,15 +532,28 @@ class AnalyticsHandler(BaseHTTPRequestHandler):
             self.send_json({"report_markdown": "Benchmark report not yet generated."})
 
 
+class ReusableHTTPServer(HTTPServer):
+    allow_reuse_address = True
+
 def run_server():
     server_address = ("", PORT)
-    httpd = HTTPServer(server_address, AnalyticsHandler)
+    try:
+        httpd = ReusableHTTPServer(server_address, AnalyticsHandler)
+    except OSError as e:
+        if e.errno == 48:
+            print(f"\n[!] Port {PORT} is currently occupied by another process.")
+            print(f"    You can free it by running: lsof -ti:{PORT} | xargs kill -9")
+            print(f"    Or restart ./run.sh --server\n")
+            sys.exit(1)
+        raise e
+
     print(f" Spotify Listening Analytics Dashboard running at http://localhost:{PORT}")
     print(f" Database connected: {DB_PATH}")
+    print(" Press Ctrl + C to stop the server anytime.\n")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print("\nShutting down server...")
+        print("\nShutting down server cleanly...")
         httpd.server_close()
 
 
