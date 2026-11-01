@@ -1,0 +1,32 @@
+name: Spotify Listening Analytics CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Generate Synthetic Dataset (25,000+ Streams)
+      run: |
+        python3 data/generator.py --streams 25000 --sqlite data/spotify_analytics.db --sql-dump data/seed_data.sql
+
+    - name: Run Analytical Unit Tests
+      run: |
+        python3 -m unittest tests/test_analytics.py
+
+    - name: Run Query Profiling & Benchmark Engine
+      run: |
+        python3 benchmark/benchmark_engine.py --db data/spotify_analytics.db --runs 20

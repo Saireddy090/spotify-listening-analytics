@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local isolated MySQL data directory
+mysql_data/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE configuration
+.vscode/
+.idea/
+
+# Local SQLite databases (recreatable via ./run.sh or data/generator.py)
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
